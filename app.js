@@ -450,7 +450,7 @@ app.get('/posts', (req, res) => {
 
 app.get('/posts/:id', (req, res) => {
   RootingStart('/post/:id');
-  db.query('SELECT * FROM `posts` WHERE `id` = ?', req.params.id || '').then((posts) => {
+  db.query('SELECT `id`, `user_id`, `body`, `mime`, `created_at` FROM `posts` WHERE `id` = ?', req.params.id || '').then((posts) => {
     makePosts(posts, {allComments: true}).then((posts) => {
       let post = posts[0];
       if (!post) {
