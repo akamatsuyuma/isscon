@@ -502,7 +502,7 @@ app.post('/', upload.single('file'), (req, res) => {
     let query = 'INSERT INTO `posts` (`user_id`, `mime`, `imgdata`, `body`) VALUES (?,?,?,?)';
     db.query(query, [me.id, mime, req.file.buffer, req.body.body]).then((result) => {
       res.redirect(`/posts/${encodeURIComponent(result.insertId)}`);
-      fs.writeFile('~/private_isu/webapp/public/image/' + result.insertId + ext, req.file.buffer , function (err) {
+      fs.writeFile('~/private_isu/webapp/public/image/' + result.insertId + ext, req.file.buffer ,'binary', function (err) {
         console.log(err);
       });
       return;
