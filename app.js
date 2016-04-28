@@ -140,6 +140,11 @@ function dbInitialize() {
   return new Promise((resolve, reject) => {
     let sqls = [];
     sqls.push('DELETE FROM users WHERE id > 1000');
+    db.query('SELECT * FROM posts WHERE id > 10000').then((posts) => {
+      posts.map((post) => {
+        fs.unlink('/home/isucon/private_isu/webapp/public' + imageUrl(post));
+      })
+    });
     sqls.push('DELETE FROM posts WHERE id > 10000');
     sqls.push('DELETE FROM comments WHERE id > 100000');
     sqls.push('UPDATE users SET del_flg = 0');
