@@ -27,7 +27,7 @@ const db = mysql.createPool({
   user: process.env.ISUCONP_DB_USER || 'root',
   password: process.env.ISUCONP_DB_PASSWORD,
   database: process.env.ISUCONP_DB_NAME || 'isuconp',
-  connectionLimit: 1,
+  connectionLimit: 10,
   charset: 'utf8mb4'
 });
 
@@ -555,4 +555,3 @@ app.post('/admin/banned', (req, res) => {
 app.use(express.static('../public', {}));
 
 app.listen(8080);
-
