@@ -105,7 +105,7 @@ function calculatePasshash(accountName, password) {
 
 //ログイン
 //return Promise
-function tryLogin(userID, accountName, password) {
+function tryLogin(accountName, password) {
   return new Promise((resolve, reject) => {
     db.query('SELECT * FROM users WHERE account_name = ? AND del_flg = 0', accountName).then((users) => {
       let user = users[0];
