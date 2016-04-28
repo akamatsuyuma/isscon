@@ -241,7 +241,7 @@ function RootingStart(path) {
   console.time(path);
 }
 
-function RootingStart(path) {
+function RootingEnd(path) {
   console.timeEnd(path);
 }
 
