@@ -1,4 +1,6 @@
 'use strict';
+
+//ライブラリ
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const express = require('express');
@@ -17,6 +19,8 @@ const upload = multer({});
 const POSTS_PER_PAGE = 20;
 const UPLOAD_LIMIT = 10 * 1024 * 1024 // 10mb
 
+//MySQL
+//TODO: connectionLimit？
 const db = mysql.createPool({
   host: process.env.ISUCONP_DB_HOST || 'localhost',
   port: process.env.ISUCONP_DB_PORT || 3306,
@@ -27,6 +31,7 @@ const db = mysql.createPool({
   charset: 'utf8mb4'
 });
 
+//View
 app.engine('ejs', ejs.renderFile);
 app.use(bodyParser.urlencoded({extended: true}));
 app.set('etag', false);
@@ -42,6 +47,8 @@ app.use(session({
 
 app.use(flash());
 
+//セッションのユーザー
+//return Promise
 function getSessionUser(req) {
   return new Promise((done, reject) => {
     if (!req.session.userId) {
@@ -58,6 +65,8 @@ function getSessionUser(req) {
   });
 }
 
+//TODO: ？
+//return Promise
 function digest(src) {
   return new Promise((resolve, reject) => {
     // TODO: shellescape対策
@@ -71,6 +80,8 @@ function digest(src) {
   });
 }
 
+//アカウント・パスワードの確認
+//return bool
 function validateUser(accountName, password) {
   if (!(/^[0-9a-zA-Z_]{3,}$/.test(accountName) && /^[0-9a-zA-Z_]{6,}$/.test(password))) {
     return false;
@@ -79,6 +90,8 @@ function validateUser(accountName, password) {
   }
 }
 
+//パスワードのハッシュ？
+//return Promise
 function calculatePasshash(accountName, password) {
   return new Promise((resolve, reject) => {
     digest(accountName).then((salt) => {
@@ -87,6 +100,8 @@ function calculatePasshash(accountName, password) {
   });
 }
 
+//ログイン
+//return Promise
 function tryLogin(accountName, password) {
   return new Promise((resolve, reject) => {
     db.query('SELECT * FROM users WHERE account_name = ? AND del_flg = 0', accountName).then((users) => {
@@ -106,6 +121,8 @@ function tryLogin(accountName, password) {
   });
 }
 
+//ユーザーIDから
+//return Promise
 function getUser(userId) {
   return new Promise((resolve, reject) => {
     db.query('SELECT * FROM `users` WHERE `id` = ?', [userId]).then((users) => {
@@ -114,6 +131,8 @@ function getUser(userId) {
   });
 }
 
+//
+//return Promise
 function dbInitialize() {
   return new Promise((resolve, reject) => {
     let sqls = [];
@@ -130,6 +149,7 @@ function dbInitialize() {
   });
 }
 
+//imageUrl
 function imageUrl(post) {
   let ext = ""
 
@@ -148,6 +168,8 @@ function imageUrl(post) {
   return `/image/${post.id}${ext}`;
 }
 
+//コメントの作成
+//return Promise
 function makeComment(comment) {
   return new Promise((resolve, reject) => {
     getUser(comment.user_id).then((user) => {
@@ -157,6 +179,8 @@ function makeComment(comment) {
   });
 }
 
+//コメント
+//return Promise
 function makePost(post, options) {
   return new Promise((resolve, reject) => {
     db.query('SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?', [post.id]).then((commentCount) => {
@@ -182,10 +206,14 @@ function makePost(post, options) {
   });
 }
 
+//複数の投稿のフィルタ
+//return ？
 function filterPosts(posts) {
   return posts.filter((post) => post.user.del_flg === 0).slice(0, POSTS_PER_PAGE);
 }
 
+//投稿の作成
+//return Promise
 function makePosts(posts, options) {
   if (typeof options === 'undefined') {
     options = {};
@@ -204,6 +232,7 @@ function makePosts(posts, options) {
   });
 }
 
+//ここからURLに対する処理の分岐
 app.get('/initialize', (req, res) => {
   dbInitialize().then(() => {
     res.send('OK');
