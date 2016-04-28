@@ -245,28 +245,16 @@ function makePosts(posts, options) {
 
 //ここからURLに対する処理の分岐
 
-function RootingStart(path) {
-  console.log(path);
-  console.time(path);
-}
-
-function RootingEnd(path) {
-  console.timeEnd(path);
-}
-
 app.get('/initialize', (req, res) => {
-  RootingStart('/initialize');
   dbInitialize().then(() => {
     res.send('OK');
   }).catch((error) => {
     console.log(error);
     res.status(500).send(error);
   });
-  RootingEnd('/initialize');
 });
 
 app.get('/login', (req, res) => {
-  RootingStart('/login');
   getSessionUser(req).then((me) => {
     if (me) {
       res.redirect('/');
@@ -274,11 +262,9 @@ app.get('/login', (req, res) => {
     }
     res.render('login.ejs', {me});
   });
-  RootingEnd('/login');
 });
 
 app.post('/login', (req, res) => {
-  RootingStart('post/login');
   getSessionUser(req).then((me) => {
     if (me) {
       res.redirect('/');
@@ -298,11 +284,9 @@ app.post('/login', (req, res) => {
       res.status(500).send(error);
     });
   });
-  RootingEnd('post/login');
 });
 
 app.get('/register', (req, res) => {
-  RootingStart('/register');
   getSessionUser(req).then((me) => {
     if (me) {
       res.redirect('/');
@@ -310,11 +294,9 @@ app.get('/register', (req, res) => {
     }
     res.render('register.ejs', {me});
   });
-  RootingEnd('/register');
 });
 
 app.post('/register', (req, res) => {
-  RootingStart('post/register');
   getSessionUser(req).then((me) => {
     if (me) {
       res.redirect('/');
@@ -349,18 +331,14 @@ app.post('/register', (req, res) => {
       });
     });
   });
-  RootingEnd('post/register');
 });
 
 app.get('/logout', (req, res) => {
-  RootingStart('/logout');
   req.session.destroy();
   res.redirect('/');
-  RootingEnd('/logout');
 });
 
 app.get('/', (req, res) => {
-  RootingStart('/');
   getSessionUser(req).then((me) => {
     db.query('SELECT `id`, `user_id`, `body`, `created_at`, `mime` FROM `posts` ORDER BY `created_at` DESC').then((posts) => {
       return makePosts(posts.slice(0, POSTS_PER_PAGE * 2));
@@ -371,11 +349,9 @@ app.get('/', (req, res) => {
     console.log(error);
     res.status(500).send(error);
   });
-  RootingEnd('/');
 });
 
 app.get('/@:accountName/', (req, res) => {
-  RootingStart('/@:accountName/');
   db.query('SELECT * FROM `users` WHERE `account_name` = ? AND `del_flg` = 0', req.params.accountName).then((users) => {
     let user = users[0];
     if (!user) {
@@ -429,11 +405,9 @@ app.get('/@:accountName/', (req, res) => {
       throw error;
     }
   });
-  RootingEnd('/@:accountName/');
 });
 
 app.get('/posts', (req, res) => {
-  RootingStart('/posts');
   let max_created_at = new Date(req.query.max_created_at);
   if (max_created_at.toString() === 'Invalid Date') {
     max_created_at = new Date();
@@ -445,11 +419,9 @@ app.get('/posts', (req, res) => {
       });
     });
   });
-  RootingEnd('/posts');
 });
 
 app.get('/posts/:id', (req, res) => {
-  RootingStart('/post/:id');
   db.query('SELECT `id`, `user_id`, `body`, `mime`, `created_at` FROM `posts` WHERE `id` = ?', req.params.id || '').then((posts) => {
     makePosts(posts, {allComments: true}).then((posts) => {
       let post = posts[0];
@@ -462,11 +434,9 @@ app.get('/posts/:id', (req, res) => {
       });
     });
   });
-  RootingEnd('/post/:id');
 });
 
 app.post('/', upload.single('file'), (req, res) => {
-  RootingStart('post/');
   getSessionUser(req).then((me) => {
     if (!me) {
       res.redirect('/login');
@@ -516,11 +486,9 @@ app.post('/', upload.single('file'), (req, res) => {
       return;
     });
   });
-  RootingEnd('post/');
 });
 
 app.get('/image/:id.:ext', (req, res) => {
-  RootingStart('/image/:id.:ext');
   db.query('SELECT * FROM `posts` WHERE `id` = ?', req.params.id).then((posts) => {
     let post = posts[0];
     if (!post) {
@@ -537,11 +505,9 @@ app.get('/image/:id.:ext', (req, res) => {
     console.log(error);
     res.status(500).send(error);
   }) ;
-  RootingEnd('/image/:id.:ext');
 });
 
 app.post('/comment', (req, res) => {
-  RootingStart('post/comment');
   getSessionUser(req).then((me) => {
     if (!me) {
       res.redirect('/login');
@@ -561,11 +527,9 @@ app.post('/comment', (req, res) => {
       res.redirect(`/posts/${encodeURIComponent(req.body.post_id)}`);
     });
   });
-  RootingEnd('post/comment');
 });
 
 app.get('/admin/banned', (req, res) => {
-  RootingStart('/admin/banned');
   getSessionUser(req).then((me) => {
     if (!me) {
       res.redirect('/login');
@@ -580,11 +544,9 @@ app.get('/admin/banned', (req, res) => {
       res.render('banned.ejs', {me, users});
     });
   });
-  RootingEnd('/admin/banned');
 });
 
 app.post('/admin/banned', (req, res) => {
-  RootingStart('post/admin/banned');
   getSessionUser(req).then((me) => {
     if (!me) {
       res.redirect('/');
@@ -607,7 +569,6 @@ app.post('/admin/banned', (req, res) => {
       return;
     });
   });
-  RootingEnd('post/admin/banned');
 });
 
 app.use(express.static('../public', {}));
