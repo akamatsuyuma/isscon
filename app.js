@@ -142,8 +142,11 @@ function dbInitialize() {
     sqls.push('DELETE FROM users WHERE id > 1000');
     db.query('SELECT * FROM posts WHERE id > 10000').then((posts) => {
       posts.map((post) => {
-        fs.unlink('/home/isucon/private_isu/webapp/public' + imageUrl(post));
+        fs.unlink('/home/isucon/private_isu/webapp/public' + imageUrl(post), function (err) {
+          console.log(err);
+        });
       })
+    }).catch((error) => {
     });
     sqls.push('DELETE FROM posts WHERE id > 10000');
     sqls.push('DELETE FROM comments WHERE id > 100000');
